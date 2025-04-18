@@ -1,0 +1,15 @@
+\section{Methodology}
+\label{sec:methodology}
+
+The aim of this work is to gain insight into the development of a feedback control system for an autonomous vehicle, specifically a \texttt{Turtlebot3} robot of the model \texttt{burger}.
+Two different control strategies have been implemented, namely a simple proportional controller and a non-linear controller based on Lyapunov stability theory.
+As for the simulation environment, the \texttt{Turtlebot3} robot was simulated in a Gazebo world, specifically the \texttt{turtlebot3\_world} provided by the \texttt{turtlebot3\_gazebo} package.
+
+The following sections will provide a detailed description of the requests associated with this assignment, the approach taken to fulfill them, and the discussion of the results obtained.
+
+\paragraph{Tools}
+
+As for the tools used, \texttt{ROS1} (Robot Operating System) was employed as the main framework for communication between the different components of the system.
+\texttt{Simulink} was used as the main agent in the loop, sending control commands to the vehicles based on the telemetry data received from the vehicle itself.
+\texttt{MATLAB} was used to perform the analysis of the data collected during the simulation, and to visualize the results.
+Notice that with the current setup used by the author, \texttt{MATLAB 2024a} and \texttt{Simulink} were running in Windows 10, while \texttt{ROS1} was running in the \texttt{WSL2} (Windows Subsystem for Linux) environment, specifically in \texttt{Ubuntu 20.04}.
