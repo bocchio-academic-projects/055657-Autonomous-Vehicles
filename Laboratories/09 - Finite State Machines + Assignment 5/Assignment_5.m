@@ -7,8 +7,8 @@ close all
 reset(0)
 set(0, 'DefaultFigureNumberTitle', 'off');
 set(0, 'DefaultFigureWindowStyle', 'docked');
-set(0, 'DefaultLineLineWidth', 1.2);
-set(0, 'defaultaxesfontsize', 12);
+set(0, 'DefaultLineLineWidth', 1.5);
+set(0, 'defaultaxesfontsize', 15);
 
 figure('Name', 'Gate parking')
 tiles = tiledlayout(1, 1);
