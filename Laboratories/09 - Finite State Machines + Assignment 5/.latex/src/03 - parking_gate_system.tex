@@ -6,7 +6,7 @@ As already mentioned in the previous sections, the focus of this assignment is t
 \subsection{Requests}
 \label{subsec:requests}
 
-The requests that the parking gate system has to fullfil are the following:
+The requests that the parking gate system has to fulfil are the following:
 
 \begin{itemize}
     \item Analyze the provided \textit{Vehicle FSM} and understand how it works;
@@ -23,25 +23,33 @@ Notice that despite the suggestion from the professor to start from the already 
 \subsection{System Overview}
 \label{subsec:system_overview}
 
-The parking gate system is composed of two main components: the \textit{Vehicle FSM} and the \textit{Parking Gate FSM}.
-The vehicle FSM is responsible for simulating the vehicle's behavior, while the parking gate FSM is responsible for controlling the gate's position and ensuring that it operates correctly in response to the vehicle's actions.
-
-In Figure \ref{fig:parking_gate_system_overview} is shown the overview of the parking gate system.
+The parking gate system is composed of a single Finite State Machine (FSM) that is responsible for modelling at the same time the vehicle and the parking gate system.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{./img/MATLAB/parking_gate_system_overview.png}
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/parking_gate_system_overview.pdf}
     \caption{Parking Gate System Overview}
-    \label{fig:parking_gate_system_overview}
+    \label{fig:parking_gate_system}
 \end{figure}
 
-It's already possible to understand which are the communication lines between the two FSMs:
+Under the hood of the unique FSM, the system is composed of other two parallel FSMs, with precise and well-defined roles and responsibilities.
+The communication between the two FSMs is done through events and state transitions, which are used to inform each other about the current state of the system and to trigger the appropriate actions.
 
 \begin{itemize}
-    \item The \textit{Vehicle FSM} sends the \textit{vehicle\_position (x)} to the \textit{Parking Gate FSM} to inform it about the vehicle's position in the parking lot;
-    \item The \textit{Parking Gate FSM} sends the \textit{semaphore\_state} to the \textit{Vehicle FSM} to inform it about the state of the gate (closed, opening, opened);
-    \item The \textit{Vehicle FSM} also sends the event about the \textit{ticket\_payment} to the \textit{Parking Gate FSM} to inform it that the vehicle has paid for the ticket and is ready to leave the parking lot;
+    \item The \textit{Vehicle FSM} share the \textit{vehicle\_position (x)} with the \textit{Parking Gate FSM} to inform it about the vehicle's position in the parking lot;
+    \item The \textit{Parking Gate FSM} share the \textit{semaphore\_state} with the \textit{Vehicle FSM} to inform it about the state of the gate (closed, opening, opened);
+    \item The \textit{Vehicle FSM} also sends the event about the \textit{TicketPayed} to the \textit{Parking Gate FSM} to inform it that the vehicle has paid for the ticket and is ready to leave the parking lot;
 \end{itemize}
+
+Figure \ref{fig:parking_gate_system} shows the top level of the parking gate system, while Figure \ref{fig:parking_gate_system_fsm} shows the parking gate system FSM.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/FSM_parking_gate_system_overview.pdf}
+    \caption{Parking Gate System FSM}
+    \label{fig:parking_gate_system_fsm}
+\end{figure}
+
 
 
 \subsubsection{Vehicle FSM}
@@ -51,19 +59,19 @@ The vehicle FSM is responsible for simulating the vehicle's behavior in the park
 It has two main states: \textit{Driving} and \textit{Waiting}.
 At first, the vehicle is initialized and given a random position ahead of the gate.
 A checkpoint is also set so that it will stop at the gate before proceeding to the next state.
-Once at the gate, the vehicle looks for the semaphore state: if the semaphore is green, it directly returns to the \textit{Driving} state and proceeds ahead to the next checkpoint which is now set to $+\infty$; instead, if the semaphore is red, it simulates the payment of the ticket by sending the event \textit{ticket\_payment} to the parking gate FSM and goes into the \textit{Waiting} state, waiting for the semaphore to turn green.
+Once at the gate, the vehicle looks for the semaphore state: if the semaphore is green, it directly returns to the \textit{Driving} state and proceeds ahead to the next checkpoint which is now set to $+\infty$; instead, if the semaphore is red, it simulates the payment of the ticket by sending the event \textit{TicketPayed} to the parking gate FSM and goes into the \textit{Waiting} state, waiting for the semaphore to turn green.
 The vehicle proceed until the gate is closed again, when the external environment resets the vehicle to a new random position ahead of the gate to start the process again.
 
 Figure \ref{fig:vehicle_fsm} shows the vehicle FSM.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{./img/MATLAB/vehicle_fsm.png}
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/vehicle_fsm.pdf}
     \caption{Vehicle FSM}
     \label{fig:vehicle_fsm}
 \end{figure}
 
-Notice that the vehicle FSM has been modelled adopting the default \textit{OR} logic, meaning that the vehicle can assume only one state at a time (i.e. \textit{Driving} or \textit{Waiting}).
+Notice that the vehicle FSM has been modelled adopting the default \textit{OR} logic, meaning that the vehicle can assume only one state at a time (i.e. \textit{Driving} or \textit{Waiting}, or \textit{Spawning} when the vehicle is initialized).
 
 
 
@@ -79,18 +87,18 @@ It has four main blocks: \textit{Controller}, \textit{Gate}, \textit{Semaphore} 
 The entry point of the parking gate FSM is the \textit{Controller} block, which is responsible for managing the overall state of the system and coordinating the other blocks.
 It has been designed to be event-driven, meaning that communicates with the subcomponents of the system by sending and receiving events.
 It has four main states: \textit{Idling}, \textit{GateOpening}, \textit{WaitingClearance} and \textit{GateClosing}.
-At first, the \textit{Controller} block is in the \textit{Idling} state, waiting for the vehicle to arrive and send the \textit{ticket\_payment} event.
-Once the ticket is paid, the \textit{Controller} block moves to the \textit{GateOpening} state, where it sends the \textit{RaiseGate} event to the \textit{Gate} block and the \textit{SemaphoreYellow} event to the \textit{Semaphore} block.
+At first, the \textit{Controller} block is in the \textit{Idling} state, waiting for the vehicle to arrive and receive the \textit{TicketPayed} event.
+Once the ticket is paid, the \textit{Controller} block moves to the \textit{GateOpening} state, where it sends the \textit{Raise} event to the \textit{Gate} block and the \textit{Yellow} event to the \textit{Semaphore} block.
 Once the gate is fully opened, the semaphore turns green and the \textit{Controller} block moves to the \textit{WaitingClearance} state, where it waits for the vehicle to pass through the gate.
 Notice that the system determines the vehicle's position by using the \textit{PhotoCell} block, which is responsible for detecting the vehicle's presence in front of the gate.
-Once the vehicle has passed through the gate, the \textit{Controller} block moves to the \textit{GateClosing} state, where it sends the \textit{LowerGate} event to the \textit{Gate} block and the \textit{SemaphoreRed} event to the \textit{Semaphore} block.
+Once the vehicle has passed through the gate, the \textit{Controller} block moves to the \textit{GateClosing} state, where it sends the \textit{Lower} event to the \textit{Gate} block and the \textit{Red} event to the \textit{Semaphore} block.
 The \textit{Controller} block then moves back to the \textit{Idling} state, waiting for the next vehicle to arrive.
 
 Figure \ref{fig:control_block} shows the \textit{Controller} block of the parking gate FSM.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{./img/MATLAB/control_block.png}
+    \includegraphics[width=0.8\textwidth]{./img/MATLAB/control_block.pdf}
     \caption{Control Block}
     \label{fig:control_block}
 \end{figure}
@@ -101,14 +109,14 @@ Figure \ref{fig:control_block} shows the \textit{Controller} block of the parkin
 As already mentioned, the \textit{Gate} block is responsible for controlling the gate's position and ensuring that it opens and closes correctly.
 It's designed based on two hierarchical states: \textit{Idling} and \textit{Moving}, which then are further divided into \textit{GateUp} and \textit{GateDown} states, and \textit{Raising} and \textit{Lowering} states, respectively.
 At first, the \textit{Gate} block is in the \textit{GateDown} state, where the gate is closed and the vehicle is not allowed to pass through.
-Once the \textit{RaiseGate} event is received from the \textit{Controller} block, the \textit{Gate} block moves to the \textit{Raising} state, where it starts to open the gate.
-Once the gate is fully opened, the \textit{Gate} block moves to the \textit{GateUp} state waiting for the \textit{LowerGate} event from the \textit{Controller} block that will then perform the same steps in reverse order, moving to the \textit{Lowering} state and then to the \textit{GateDown} state once the gate is fully closed.
+Once the \textit{Raise} event is received from the \textit{Controller} block, the \textit{Gate} block moves to the \textit{Raising} state, where it starts to open the gate.
+Once the gate is fully opened, the \textit{Gate} block moves to the \textit{GateUp} state waiting for the \textit{Lower} event from the \textit{Controller} block that will then perform the same steps in reverse order, moving to the \textit{Lowering} state and then to the \textit{GateDown} state once the gate is fully closed.
 
 Figure \ref{fig:gate_block} shows the \textit{Gate} block of the parking gate FSM.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{./img/MATLAB/gate_block.png}
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/gate_block.pdf}
     \caption{Gate Block}
     \label{fig:gate_block}
 \end{figure}
@@ -118,13 +126,13 @@ The trapezoidal motion profile is defined by the following equations:
 
 \begin{equation}
     w(t) = \begin{cases}
-        \frac{w_{max}}{t_1} t                   & t_0 \leq t < t_1 \\
-        w_{max}                                 & t_1 \leq t < t_2 \\
-        w_{max} - \frac{w_{max}}{t_3} (t - t_3) & t_2 \leq t < t_3
+        \frac{w_{max}}{t_1} t                 & 0 \leq t < t_1   \\
+        w_{max}                               & t_1 \leq t < t_2 \\
+        w_{max} - \frac{w_{max}}{t_3} (t - T) & t_2 \leq t < T
     \end{cases}
 \end{equation}
 
-Where $t_0$ is the time when the gate starts to open, $t_1$ is the time when the gate reaches the maximum speed and $t_2$ is the time when the gate starts to decelerate.
+Where $t_1$ is the time when the gate reaches the maximum speed and $t_2$ is the time when the gate starts to decelerate.
 The trapezoidal motion profile is designed to ensure that the gate opens and closes smoothly, without any sudden jerks or stops.
 Listing \ref{lst:trapezoidal_motion_profile} shows the implementation of the trapezoidal motion profile as MATLAB function.
 
@@ -176,16 +184,16 @@ end
 \paragraph{PhotoCell}
 
 Despite being used only during the \textit{WaitingClearance} state of the \textit{Controller} block, the \textit{PhotoCell} block is responsible for detecting the vehicle's presence in front of the gate.
-This, in fact, is the only way to understand if the vehicle has passed through the gate and the gate can be closed again.
-In order to continuously sample the vehicle's position, the \textit{PhotoCell} block is designed to not be event-driven, but to move continuously between the two states \textit{VehiclePresent} and \textit{VehicleNotPresent} based on the vehicle's position.
+This, in fact, is the only way to understand if the vehicle has passed through the gate and the gate can be closed again safely.
+In order to continuously sample the vehicle's position, the \textit{PhotoCell} block is designed to not be event-driven, but to move continuously between the two states \textit{Free} and \textit{Occupied} based on the vehicle's position.
 By doing so, an external agent can continuously monitor the vehicle's position by checking the state of the \textit{PhotoCell} block.
-In order to determines the presence or not of the vehicle, the \textit{PhotoCell} block uses the knowledge of the vehicle's position, which is sent by the \textit{Vehicle FSM} as an input to the \textit{Parking Gate FSM}.
+In order to determines the presence or not of the vehicle, the \textit{PhotoCell} block uses the knowledge of the vehicle's length and position, the latter of which is shared by the \textit{Vehicle FSM}.
 
 Figure \ref{fig:photocell_block} shows the \textit{PhotoCell} block of the parking gate FSM.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\textwidth]{./img/MATLAB/photocell_block.png}
+    \includegraphics[width=0.4\textwidth]{./img/MATLAB/photocell_block.pdf}
     \caption{PhotoCell Block}
     \label{fig:photocell_block}
 \end{figure}
@@ -195,14 +203,14 @@ Figure \ref{fig:photocell_block} shows the \textit{PhotoCell} block of the parki
 
 Last but not least, the \textit{Semaphore} block is responsible for switching the semaphore state between red, yellow and green based on the events received from the \textit{Controller} block.
 It has one single state \textit{On} composed of  three sub-states representative of the color of the semaphore.
-Based on the event received, the correct sub-state is chosen and the semaphore state is then sent to the \textit{Vehicle FSM} to inform it about the state of the gate (open, closed, etc.).
+Based on the event received, the correct sub-state is chosen and the semaphore state is then shared with the \textit{Vehicle FSM} to inform it about the state of the gate (open, closed, etc.).
 This is done in order to inform the vehicle about the state of the gate and allow it to proceed or stop based on the semaphore state, which is the only information that the vehicle has about the parking gate system (i.e. the vehicle doesn't know if the gate is open or closed, but only if the semaphore is red or green).
 
 Figure \ref{fig:semaphore_block} shows the \textit{Semaphore} block of the parking gate FSM.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{./img/MATLAB/semaphore_block.png}
+    \includegraphics[width=0.4\textwidth]{./img/MATLAB/semaphore_block.pdf}
     \caption{Semaphore Block}
     \label{fig:semaphore_block}
 \end{figure}
@@ -212,7 +220,7 @@ Figure \ref{fig:semaphore_block} shows the \textit{Semaphore} block of the parki
 \subsection{Simulation Results}
 \label{subsec:simulation_results}
 
-The simulation has been run for $100s$ and the vehicle has been reset to a new random position after the gate has been closed.
+The simulation has been run for $100s$ and the vehicle has been reset to a new random position right after the closure of the gate.
 The following figures show the results of the simulation.
 
 \begin{figure}[H]
@@ -222,7 +230,7 @@ The following figures show the results of the simulation.
     \label{fig:simulation_results}
 \end{figure}
 
-Figure \ref{fig:simulation_results} shows the vehicle position (in black) and the gate position (in blue) over time.
+Figure \ref{fig:simulation_results} shows the vehicle position (in black) and the gate angular position (in red) over time.
 The plot has also been divided into different regions based on the state of the \textit{Semaphore} block (red, yellow and green).
 Notice that for clarity, the semaphore state has been added to the plot only when actually visible by the vehicle (i.e. when the vehicle is in front of the gate and not yet passed through it).
 
@@ -232,7 +240,8 @@ One can appreciate how the two FSMs are coordinated and how the events are sent 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{./img/events.png}
+    \includegraphics[width=1.0\textwidth]{./img/events_part_1.png}
+    \includegraphics[width=1.0\textwidth]{./img/events_part_2.png}
     \caption{Simulation Results - Detailed View}
     \label{fig:simulation_results_detailed}
 \end{figure}

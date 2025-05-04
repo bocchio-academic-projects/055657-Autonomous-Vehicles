@@ -71,4 +71,24 @@ pdfauthor={Tommaso Bocchietti}
 \bibliographystyle{plain}
 \bibliography{references.bib}
 
+\vspace*{\fill}
+\appendix
+\section{Appendix}
+
+The system presented in Section \ref{subsec:system_overview}, leverages one single FSM including under the hood both the vehicle and the parking gate FSMs.
+However, this solution is not the most elegant one given that the two FSMs are actually two separate entities that communicate with each other via external signals.
+For this reason, the first solution and implementation of the parking gate system was the one shown in Figure \ref{fig:original_parking_gate_system_overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/original_version.pdf}
+    \caption{Original Parking Gate System Overview}
+    \label{fig:original_parking_gate_system_overview}
+\end{figure}
+
+Notice that the underling components and states are exactly the same as the ones presented in the previous section.
+Nonetheless, the structure of Figure \ref{fig:original_parking_gate_system_overview} resolved in unexpected behavior of the system and never generated the expected results.
+
+Even with the help of debugging tools, it was impossible to understand the reason behind the unexpected behavior of the system and the author had to simplify the structure and fallback to the single FSM solution discussed during the document (compromise between elegance and functionality).
+
 \end{document}
