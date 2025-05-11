@@ -1,0 +1,31 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Motion planning is a fundamental aspect of autonomous vehicle navigation, enabling them to navigate complex environments while avoiding obstacles and reaching their destinations efficiently.
+
+While in previous work we have focused on the implementation of two grid-based motion planning algorithms, namely Dijkstra and A*, this report aims to implement and analyze sampled-based motion planning algorithms.
+Specifically, we focus on Rapidly-exploring Random Trees (RRT) and two of its variant, RRT* and a kinematically-learnt version of RRT.
+
+After a brief introduction to the sampled-based motion planning approach, we present the implementation of the algorithms, followed by a discussion of the results obtained by running them on a set of predefined map scenarios.
+An extensive comparison of the performance between the previously implemented A* algorithm and the RRT* algorithm is also reported, highlighting the strengths and weaknesses of each approach.
+
+% Finally, just to demonstrate the capabilities of the implemented algorithms, we set up a simple control system for an 4-wheel steering-capable vehicle, and we show the ability of our RRT-kinematics algorithm to generate a trajectory that respect the non-holonomic constraints of the vehicle and safely navigate through a complex environment.
+
+\paragraph{Report Structure}
+
+The report is structured as follows:
+
+\begin{itemize}
+    \item In Section \ref{sec:sampling_based_planning}, we provide a brief introduction to the sampled-based motion planning algorithms, giving an overview of the single-query and multi-query approaches, and discussing the RRT algorithm and its variants.
+    \item In Section \ref{sec:algorithm_implementation}, we present the all the three algorithms, RRT, RRT* and RRT-kinematics, explaining the main features of each one and the implementation details.
+    \item In Section \ref{sec:algorithm_testing}, we present the results obtained by running the algorithms on a set of predefined map scenarios, and we discuss their performance in terms of computation time, path length and number of nodes sampled.
+    \item In Section \ref{sec:grid_vs_sample_based_planning}, we compare the performance of the RRT* algorithm with the A* algorithm, highlighting the strengths and weaknesses of each approach.
+          % \item In Section \ref{sec:autonomous_driving_demo}, we quickly introduce the simulated environment used to test the algorithms, and we show the ability of our RRT-kinematics algorithm to generate a trajectory that respect the non-holonomic constraints of the vehicle and safely navigate through a complex environment.
+    \item In Section \ref{sec:conclusions}, we summarize the main findings of the report and discuss the future work that can be done to improve the algorithms and their performance.
+\end{itemize}
+
+
+\paragraph{Tools}
+
+As for the tools used, \texttt{MATLAB} is employed as the main platform for implementing the algorithms and performing the analysis of the results.
+% As for the simulation environment, we will use both \texttt{MATLAB}, \texttt{Simulink} and \texttt{ROS} to planning, control and visualize the vehicle behavior.

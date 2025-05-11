@@ -1,0 +1,22 @@
+\section{Conclusions}
+\label{sec:conclusions}
+
+In this project we have implemented tree sampling-based single-query motion planning algorithms, specifically RRT, RRT*, and RRT-kinematic.
+We have run them on a set of predefined scenarios, and we have compared their performance in terms of path length, computation time, and number of nodes.
+A comparison with grid-based planning algorithms has also been performed, showing that the tree sampling-based algorithms are more efficient in terms of computation time but lacks the optimality property of grid-based ones.
+
+We are confident that an optimized implementation of both the classes of algorithms would lead to a more efficient and effective solution for motion planning problems.
+However, we believe that our implementation has already been capable of providing a good overview of the performance of the algorithms and their potential applications in real-world scenarios.
+In particular, a massive improvement in the performance of the tree sampling-based algorithms can be achieved by using a more efficient data structure for the tree, such as a \texttt{KD-tree}.
+This would allow for a faster nearest neighbor search, which is a key operation in the RRT algorithm.
+
+Moreover, we are confident to say that the combination of a quick exploration of the space and a local grid-based search is the key to achieving optimality in motion planning problems.
+As demonstrated in the multidimensional case, the capabilities of sampling-based algorithms to quickly explore vast volumes of space in a short time are notable.
+However, once the first sampled is placed in the vicinity of the goal, many more samples are needed before effectively connecting the goal node.
+This, could be solved by using a local grid-based search, which would work as a local optimizer, reducing the effort needed to simply connect the goal node to the tree.
+
+In conclusion, sampling-based algorithms represent a robust and scalable approach for tackling motion planning problems, especially in high-dimensional or dynamic environments, where fast replanning is often required.
+Due to their weakness in terms of optimality, hybrid approaches that combine the strengths of both sampling-based and grid-based methods are likely to be the most effective in practice.
+The integration of these two paradigms could lead to planners that are not only computationally efficient but also capable of producing high-quality solutions across a wide range of applications.
+
+We believe that the future of motion planning lies in the development of hybrid algorithms that can leverage the strengths of both sampling-based and grid-based methods.
