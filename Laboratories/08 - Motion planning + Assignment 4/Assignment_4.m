@@ -59,37 +59,39 @@ fprintf([ ...
     sum(isfinite(distances)), sequenceLength);
 
 
+return
 
-% %% Plots
-% reset(0)
-% set(0, 'DefaultFigureNumberTitle', 'off');
-% set(0, 'DefaultFigureWindowStyle', 'docked');
-% set(0, 'DefaultLineLineWidth', 1.2);
-% set(0, 'defaultaxesfontsize', 12);
-% 
-% % Waypoints visualization
-% figure('Name', 'Graph')
-% tiles = tiledlayout(1, 2);
-% 
-% map_tile = nexttile(tiles, 1);
-% 
-% if exist('img', 'var')
-%     imshow(img)
-% end
-% 
-% title('Full size map')
-% 
-% graph_tile = nexttile(tiles, 2);
-% hold on
-% grid on
-% 
-% plotGraph(G)
-% plotSequence(G, sequenceEdges)
-% 
-% % axis equal
-% axis padded
-% 
-% title('Graph Visualization')
+
+%% Plots
+reset(0)
+set(0, 'DefaultFigureNumberTitle', 'off');
+set(0, 'DefaultFigureWindowStyle', 'docked');
+set(0, 'DefaultLineLineWidth', 1.2);
+set(0, 'defaultaxesfontsize', 12);
+
+% Waypoints visualization
+figure('Name', 'Graph')
+tiles = tiledlayout(1, 2);
+
+map_tile = nexttile(tiles, 1);
+
+if exist('img', 'var')
+    imshow(img)
+end
+
+title('Full size map')
+
+graph_tile = nexttile(tiles, 2);
+hold on
+grid on
+
+plotGraph(G)
+plotSequence(G, sequenceEdges)
+
+% axis equal
+axis padded
+
+title('Graph Visualization')
 % 
 % 
 % %% Export
