@@ -17,10 +17,11 @@ for i = 1:size(waypoints, 1)
     msg_pose_covariance.Covariance((i-1)*3 + 1) = waypoints(i, 1);
     msg_pose_covariance.Covariance((i-1)*3 + 2) = waypoints(i, 2);
     msg_pose_covariance.Covariance((i-1)*3 + 3) = waypoints(i, 3);
-    send(pub_waypoints, msg_pose_covariance);
-    pause(1);
+    % pause(1);
 
 end
+
+send(pub_waypoints, msg_pose_covariance);
 
 
 %% Data loader

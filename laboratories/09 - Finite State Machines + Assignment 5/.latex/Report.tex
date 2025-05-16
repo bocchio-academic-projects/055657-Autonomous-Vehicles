@@ -1,0 +1,94 @@
+\documentclass{assignment}
+
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{adjustbox}
+\usepackage{titlesec}
+\usepackage{soul}
+\usepackage{csvsimple}
+
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+
+\usepackage{pgfplots}
+\usepackage{graphics, epsfig}
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{matlab-prettifier}
+\usepackage{multirow}
+
+\usetikzlibrary{decorations.pathmorphing, decorations.markings}
+\usetikzlibrary{positioning}
+
+\usetikzlibrary{calc,patterns,angles,quotes}
+\setlength{\parindent}{0pt}
+
+\usetikzlibrary{shapes, arrows}
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium stretches=true, trapezium left angle=70, trapezium right angle=110, minimum width=4cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=4cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\hypersetup{
+pdftitle={Autonomous Vehicles},
+pdfsubject={Assignment V},
+pdfauthor={Tommaso Bocchietti}
+}
+
+\makeglossaries
+
+\begin{document}
+
+\title{Autonomous Vehicles \\ Assignment V: Finite State Machines}
+\author{Tommaso Bocchietti 10740309}
+\date{A.Y. 2024/25}
+
+\maketitle
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./pdf/Polimi_logo_coverpage.pdf}
+    \label{fig:Polimi_logo}
+\end{figure}
+
+\clearpage
+\tableofcontents
+\listoffigures
+% \listoftables
+% \lstlistoflistings
+% \printglossary[type=\acronymtype]
+
+\clearpage
+\input{src/01 - introduction.tex}
+\input{src/02 - finite_state_machines.tex}
+\input{src/03 - parking_gate_system.tex}
+\input{src/04 - conclusions.tex}
+
+\vspace*{\fill}
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{references.bib}
+
+\vspace*{\fill}
+\appendix
+\section{Appendix}
+
+The system presented in Section \ref{subsec:system_overview}, leverages one single FSM including under the hood both the vehicle and the parking gate FSMs.
+However, this solution is not the most elegant one given that the two FSMs are actually two separate entities that communicate with each other via external signals.
+For this reason, the first solution and implementation of the parking gate system was the one shown in Figure \ref{fig:original_parking_gate_system_overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./img/MATLAB/original_version.pdf}
+    \caption{Original Parking Gate System Overview}
+    \label{fig:original_parking_gate_system_overview}
+\end{figure}
+
+Notice that the underling components and states are exactly the same as the ones presented in the previous section.
+Nonetheless, the structure of Figure \ref{fig:original_parking_gate_system_overview} resolved in unexpected behavior of the system and never generated the expected results.
+
+Even with the help of debugging tools, it was impossible to understand the reason behind the unexpected behavior of the system and the author had to simplify the structure and fallback to the single FSM solution discussed during the document (compromise between elegance and functionality).
+
+\end{document}

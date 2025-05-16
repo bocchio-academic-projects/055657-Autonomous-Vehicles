@@ -1,0 +1,240 @@
+\section{Grid-based planning}
+\label{sec:grid_based_planning}
+
+In the field of robotics, a variety of algorithms are available for path planning, each with its own strengths and weaknesses.
+One of the most ancient and well known class of algorithms is the so called \textit{Grid-based}, which is based on the discretization of the environment into a grid of cells.
+Once the environment is represented as a grid, the problem of path planning is reduced to a graph search problem, where the cells of the grid are the nodes of the graph and the edges are the connections between adjacent cells.
+
+
+\subsection{Requests}
+\label{sec:requests}
+
+Among the graph search algorithms, two of the most widely known are the \texttt{Dijkstra} and its extension \texttt{A*} algorithm.
+The goal of this assignment can be summarized as follows:
+
+\begin{itemize}
+    \item Implement both the \texttt{Dijkstra} and \texttt{A*} algorithms;
+    \item Allow the possibility of orthogonal and diagonal movements;
+    \item Test the algorithms on a set of predefined maps and compare the performances.
+\end{itemize}
+
+
+\subsection{Graph search algorithms}
+\label{sec:graph_search_algorithms}
+
+In general, given a graph $G = (V, E)$, where $V$ is the set of vertices and $E$ is the set of edges, a graph search algorithm is used to find a path from a starting vertex $s \in V$ to a goal vertex $g \in V$.
+The main idea is that the algorithm explores the graph by expanding nodes and evaluating their neighbors until it finds the goal node or exhausts all possibilities.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tikzpicture}[node distance=1.8cm]
+
+        % Nodes
+        \node (start) [startstop] {Start};
+        \node (init) [process, below of=start] {Init queue $Q$ and costs $C(*) = \infty$};
+        \node (check) [decision, below of=init, yshift=-1.0cm] {$q != g$ \& $Q != []$};
+        \node (get_next) [process, below of=check, yshift=-1.0cm] {$q = getNext(q)$};
+        \node (get_neighbors) [process, below of=get_next] {$q' = getNeighbors(q)$};
+        \node (update) [process, below of=get_neighbors] {Update costs $C(q')$ and parent $q$};
+
+        \node (stop) [startstop, left of=check, xshift=-3cm] {Stop};
+
+        % Arrows
+        \draw [arrow] (start) -- (init);
+        \draw [arrow] (init) -- (check);
+        \draw [arrow] (check) -- node[anchor=west] {True} (get_next);
+        \draw [arrow] (get_next) -- (get_neighbors);
+        \draw [arrow] (get_neighbors) -- (update);
+
+        \draw [arrow] (update) -- +(3,0) |- (check.east) node[pos=0.25, above, rotate=-90] {Repeat};
+        \draw [arrow] (check.west) -- node[anchor=north] {False} (stop);
+
+    \end{tikzpicture}
+
+    \caption{Generic graph search algorithm flowchart}
+    \label{fig:graph_search_flowchart}
+
+\end{figure}
+
+The flowchart in Figure \ref{fig:graph_search_flowchart} summarizes the main steps of a generic graph search algorithm.
+The algorithm starts by initializing the open list of nodes and the costs of all nodes to infinity.
+Then, it enters a loop where based on the previous node visited, its neighbors are evaluated and added to the open list.
+For each neighbor, the algorithm updates the cost if lower than what already stored and in case updates also the parent node.
+The loop continues until the open list is empty, or the goal node is reached.
+
+Grid-based algorithms have been proven to be complete and optimal, meaning that they will always find the shortest path if one exists.
+However, they can be computationally expensive, especially in large environments.
+
+There exist many variations built on top of the core algorithm presented in Figure \ref{fig:graph_search_flowchart}.
+But, what really differentiates them, is the criteria used to select the next node to analyze from the open list.
+Some of the most common approaches are:
+
+\begin{itemize}
+    \item \textbf{Depth-first search (DFS)}: explores as far as possible along each branch before backtracking. It uses a stack to keep track of the nodes to be explored. This approach can easily get stuck in loops.
+    \item \textbf{Breadth-first search (BFS)}: explores all the neighbors of a node before moving on to the next level. It uses a queue to keep track of the nodes to be explored.
+    \item \textbf{Best-first (a.k.a. Dijkstra)}: selects the node with the lowest cost from the start. This approach is optimal and complete, but can be slow in large environments.
+    \item \textbf{A*}: an extension of Dijkstra's algorithm that uses a heuristic to estimate the cost from the current node to the goal node. This approach is also optimal and complete, and is often faster than Dijkstra's algorithm in practice, requiring a lower number of nodes to be explored.
+\end{itemize}
+
+In the following sections, we will focus on the Dijkstra and A* algorithms, explaining their mechanisms in choosing the next node to be explored and how they can be implemented to solve the path planning problem in a grid-based environment.
+
+
+
+\subsubsection{Dijkstra's algorithm}
+\label{sec:dijkstra_algorithm}
+
+As already mentioned, Dijkstra's algorithm leverages the core structure of the graph search algorithm presented in Figure \ref{fig:graph_search_flowchart}, but with a specific strategy for selecting the next node to explore.
+
+In particular, at each iteration, the algorithm selects the node among the nodes in the open list that has the lowest cost from the start node.
+The idea is so to select $q' \in Q$ such that:
+
+\begin{equation}
+    q' = minarg_{q \in Q} C(q)
+\end{equation}
+
+Where $C(q)$ is the cost of reaching node $q$ from the start node $s$.
+The cost is calculated as the sum of the cost of the previous node $q$ and the cost of moving from $q$ to $q'$.
+
+From an implementation point of view, the algorithm can be easily implemented using a priority queue to store the nodes in the open list.
+The priority queue allows for efficient retrieval of the node with the lowest cost, which is crucial for the performance of the algorithm.
+Listing \ref{lst:dijkstra_algorithm} shows a possible implementation of the Dijkstra's algorithm.
+The algorithm takes as input the graph $G$, the start node $s$, and the goal node $g$.
+
+\begin{lstlisting}[
+    style=Matlab-editor,
+    caption={Code for the implementation of Dijkstra's algorithm.},
+    label={lst:dijkstra_algorithm}
+]
+function [exist, distances, parents] = dijkstra(G, node_initial, node_final)
+% DIJKSTRA Finds the shortest path between two nodes in a graph
+% using Dijkstra's algorithm.
+
+N = length(G.nodes);
+distances = inf(N, 1);
+parents   = NaN(N, 1);
+visited   = false(N, 1);
+
+% Initialization
+ID_current = node_initial.ID;
+distances(ID_current) = 0;
+
+while (ID_current ~= node_final.ID && ~all(visited))
+
+    unvisited = find(~visited);
+    [~, ID_current] = min(distances(unvisited));
+    ID_current = unvisited(ID_current);
+
+    visited(ID_current) = true;
+
+    % For each neighbor not yet visited
+    IDs_neighbors = G.adjacents{ID_current};
+    IDs_neighbors = IDs_neighbors(~visited(IDs_neighbors));
+    for ID_neighbor = IDs_neighbors'
+
+        distance = ...
+            distances(ID_current) + ...
+            G.getEdgeByConnection(ID_current, ID_neighbor).weight;
+
+        if distance < distances(ID_neighbor)
+            distances(ID_neighbor) = distance;
+            parents(ID_neighbor) = ID_current;
+        end
+
+    end
+
+end
+
+exist = ~isinf(distances(node_final.ID));
+
+end
+\end{lstlisting}
+
+The algorithm starts by initializing the distances of all nodes to infinity, except for the start node, which is set to zero.
+Then, it enters a loop where it selects the node with the lowest cost from the open list and explores its neighbors.
+For each neighbor, it updates the cost if the new cost is lower than the previously stored cost and updates the parent node accordingly.
+The loop continues until the goal node is reached, or all nodes have been visited.
+Finally, the algorithm returns the distances and parents of each node, which can be used to reconstruct the shortest path from the start node to the goal node.
+
+
+
+\subsubsection{A* algorithm}
+\label{sec:a_star_algorithm}
+
+A* algorithm is an extension of Dijkstra's algorithm that uses a heuristic to estimate the cost from the current node to the goal node.
+The heuristic is a function that provides an estimate of the cost to reach the goal from a given node, and it is used to guide the search towards the goal more efficiently.
+
+In particular, the A* algorithm selects the next node to explore based on the sum of the cost from the start node to the next node and the estimated cost from the next node to the goal node.
+The selection is done as follows:
+
+\begin{equation}
+    q' = min\arg_{q \in Q} (C(q) + h(q))
+\end{equation}
+
+Where $h(q)$ is the heuristic function that estimates the cost from node $q$ to the goal node $g$.
+The heuristic function can be any function that provides an estimate of the cost, but it is important that it is admissible, meaning that it never overestimates the true cost to reach the goal.
+For the sake of simplicity, and in particular leveraging the meaningful geometrical interpretation of the grid-based environment, we will use the Euclidean distance as the heuristic function.
+The A* algorithm can be implemented similarly to Dijkstra's algorithm, with the addition of the heuristic function.
+Listing \ref{lst:a_star_algorithm} shows a possible implementation of the A* algorithm.
+The algorithm takes in the same input as the Dijkstra's one.
+
+\begin{lstlisting}[
+    style=Matlab-editor,
+    caption={Code for the implementation of A* algorithm.},
+    label={lst:a_star_algorithm}
+]
+function [exist, distances, parents] = astar(G, node_initial, node_final)
+% ASTAR Finds the shortest path between two nodes in a graph
+% using the A* algorithm.
+
+N = length(G.nodes);
+distances = inf(N, 1);
+costs     = inf(N, 1);
+parents   = NaN(N, 1);
+visited   = false(N, 1);
+
+% Initialization
+ID_current = node_initial.ID;
+distances(ID_current) = 0;
+costs(ID_current) = Node.euclideanDistance(node_initial.state, node_final.state);
+
+while (ID_current ~= node_final.ID && ~all(visited))
+
+    unvisited = find(~visited);
+    [~, ID_current] = min(costs(unvisited));
+    ID_current = unvisited(ID_current);
+
+    visited(ID_current) = true;
+
+    % For each neighbor not yet visited
+    IDs_neighbors = G.adjacents{ID_current};
+    IDs_neighbors = IDs_neighbors(~visited(IDs_neighbors));
+    for ID_neighbor = IDs_neighbors'
+
+        distance = ...
+            distances(ID_current) + ...
+            G.getEdgeByConnection(ID_current, ID_neighbor).weight;
+
+        if distance < distances(ID_neighbor)
+
+            distances(ID_neighbor) = distance;
+            parents(ID_neighbor) = ID_current;
+
+            node_neighbor = G.getNodeByID(ID_neighbor);
+            costs(ID_neighbor) = distance + Node.euclideanDistance(node_neighbor.state, node_final.state);
+
+        end
+
+    end
+
+end
+
+exist = ~isinf(distances(node_final.ID));
+
+end
+\end{lstlisting}
+
+One can clearly notice that the structure of the A* algorithm is basically the same as the Dijkstra's algorithm, except for the addition of the heuristic function in the cost calculation.
+Notice also that the heuristic function is only used to update the cost of the nodes in the open list, and it is not used to update the distances of the nodes from the start node.
+
+Given that now the algorithms is somehow guided, one can expect that the A* algorithm will be faster than the Dijkstra one, as fewer nodes will be explored.
