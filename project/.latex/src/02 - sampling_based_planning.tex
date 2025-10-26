@@ -1,0 +1,89 @@
+\section{Sampling-based planning}
+\label{sec:sampling_based_planning}
+
+In the field of robotics, a variety of algorithms are available for path planning, each with its own strengths and weaknesses.
+One of the most ancient and well known class of algorithms is the so called \textit{Grid-based}, which is based on the discretization of the environment into a grid of cells and nodes.
+As we have already discovered during the previous assignment, this approach is particularly useful for environments with a known structure, such as indoor environments or outdoor environments with well-defined obstacles but is limited in terms of scalability and flexibility.
+
+In contrast, \textit{Sampling-based} algorithms are designed to work in high-dimensional spaces and can handle much more complex environments.
+For this reason, most of the modern path planning algorithms are based on sampling-based methods, which are able to efficiently explore the configuration space of the robot and find a feasible path from the start to the goal configuration.
+
+Among the many robotics applications that benefit from sampling-based algorithms, we can mention:
+
+\begin{itemize}
+    \item Terrestrial robots: path planning for autonomous vehicles in outdoor environments, such as urban areas or off-road terrains. The ability to handle large environments is crucial for the success of these applications.
+    \item Robotic manipulation: path planning for robotic arms in cluttered environments, where the robot needs to avoid obstacles and reach a specific target position. The ability to handle high-dimensional configuration spaces is essential for these applications.
+\end{itemize}
+
+Sampling-based algorithms are further divided into two main classes: \textit{single-query} and \textit{multi-query} algorithms.
+Single-query algorithms are designed to find a path from a specific start configuration to a specific goal configuration, while multi-query algorithms are designed to find paths between multiple pairs of start and goal configurations.
+
+In the following sections, we focus exclusively on the single-query algorithms, leaving the multi-query algorithms for future discussions.
+
+
+\subsection{Single-query algorithms}
+\label{sec:single_query_algorithms}
+
+As it was for the grid-based ones, also the single-query sampling-based algorithms follow a structure that is in common to all of them.
+The main idea here is to start from a given configuration and then randomly sample points in the configuration space, connecting them to form a tree if the condition of collision-free is satisfied.
+The tree is then incrementally expanded until a path from the start configuration to the goal configuration is found.
+
+The fundamental difference between grid-based and sampling-based algorithms is that the former rely on a discretized representation of the environment, while the latter rely on a continuous representation of the configuration space.
+This allows sampling-based algorithms to handle complex environments with arbitrary shapes and obstacles, as they do not rely on a fixed grid structure.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tikzpicture}[node distance=1.5cm]
+
+        % Nodes
+        \node (start) [startstop] {Start};
+        \node (init) [process, below of=start] {Init tree $T$};
+        \node (sample) [process, below of=init] {Sample $q_{rand}$};
+        \node (nearest) [process, below of=sample] {Find nearest $q_{near}$ in $T$};
+        \node (new) [process, below of=nearest] {Generate $q_{new}$};
+        \node (collision) [decision, below of=new, yshift=-1.0cm] {$\vec{q_{near}q_{new}} \in C_{free}$};
+        \node (add) [process, below of=collision, yshift=-1.2cm] {Add $q_{new}$ to $T$};
+        \node (end) [decision, below of=add, yshift=-0.8cm] {$q_{new} == q_{goal}$};
+
+        \node (stop) [startstop, left of=end, xshift=-3cm] {Stop};
+
+        % Arrows
+        \draw [arrow] (start) -- (init);
+        \draw [arrow] (init) -- (sample);
+        \draw [arrow] (sample) -- (nearest);
+        \draw [arrow] (nearest) -- (new);
+        \draw [arrow] (new) -- (collision);
+        \draw [arrow] (collision) -- node[anchor=west] {True} (add);
+        \draw [arrow] (collision) -- node[anchor=north] {False} +(3,0) |- (sample.east);
+        \draw [arrow] (add) -- (end);
+        \draw [arrow] (end) -- node[anchor=north] {False} +(3,0) |- (sample.east) node[pos=0.25, above, rotate=-90] {Repeat};
+        \draw [arrow] (end.west) -- node[anchor=north] {True} (stop);
+
+    \end{tikzpicture}
+
+    \caption{Generic sampling-based algorithm flowchart}
+    \label{fig:sampling_based_flowchart}
+
+\end{figure}
+
+The flowchart in Figure \ref{fig:sampling_based_flowchart} summarizes the main steps of a generic sampling-based algorithm.
+One can notice that tree $T$ is built incrementally at each iteration, starting from the initial configuration and adding new sampled points to the tree if they respect the collision-free condition.
+As already said, this is in fact the main difference between the sampling-based algorithms and the grid-based algorithms, which rely on a complete discretization of the environment made in advance.
+
+However, the sampling-based algorithms suffers from a major drawback, which is the lack of completeness and optimality.
+In particular, the algorithms are not guaranteed to find a solution, even if one exists, and the solution found may not be optimal.
+As we discuss in the following sections, improvements have been made to the core structure to address these issues, but they still remain a challenge in the field of robotics and motion planning.
+
+There exist many variations built on top of the core algorithm presented in Figure \ref{fig:sampling_based_flowchart}.
+The most common ones are:
+
+\begin{itemize}
+    \item \textbf{Rapidly-exploring Random Tree (RRT)}: a single-query algorithm that just implements the core algorithm presented in Figure \ref{fig:sampling_based_flowchart}. It's the simplest, but also the most suboptimal algorithm among the ones presented in this project.
+    \item \textbf{RRT*}: an extension of the RRT algorithm that improves the optimality of the solution by rewiring the tree to find shorter paths. It is more computationally expensive than the RRT algorithm, but it is able to refine the solutions in terms of path length.
+    \item \textbf{RRT-connect}: a variant of the RRT algorithm that builds two trees, one from the start configuration and one from the goal configuration, and connects them to find a path. It's usually faster than the RRT algorithm to find a solution given that the search space is explored from both ends and also benefits from some form of optimality.
+    \item \textbf{RRT-kinematic}: a variant of the RRT algorithm that takes into account the kinematic constraints of the robot/vehicle during the planning process. This is particularly useful for vehicles with non-holonomic constraints, such as terrestrial vehicles or mobile robots. The algorithm generates a tree of feasible trajectories that respect the kinematic constraints of the robot.
+\end{itemize}
+
+The following sections focus on the in-depth analysis and implementation of the RRT, RRT* and RRT-kinematic algorithms.
+Notice that despite being a popular and widely used algorithm, the RRT-connect algorithm is not going to be implemented in this project due to time constraints.

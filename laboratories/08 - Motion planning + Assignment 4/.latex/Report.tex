@@ -1,0 +1,115 @@
+\documentclass{assignment}
+
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{adjustbox}
+\usepackage{titlesec}
+\usepackage{soul}
+\usepackage{csvsimple}
+
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+
+\usepackage{pgfplots}
+\usepackage{graphics, epsfig}
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{matlab-prettifier}
+\usepackage{multirow}
+
+\usetikzlibrary{decorations.pathmorphing, decorations.markings}
+\usetikzlibrary{positioning}
+
+\usetikzlibrary{calc,patterns,angles,quotes}
+\setlength{\parindent}{0pt}
+
+\usetikzlibrary{shapes, arrows}
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium stretches=true, trapezium left angle=70, trapezium right angle=110, minimum width=4cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=4cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\hypersetup{
+pdftitle={Autonomous Vehicles},
+pdfsubject={Assignment IV},
+pdfauthor={Tommaso Bocchietti}
+}
+
+\makeglossaries
+
+\begin{document}
+
+\title{Autonomous Vehicles \\ Assignment IV: Algorithms for grid-based motion planning}
+\author{Tommaso Bocchietti 10740309}
+\date{A.Y. 2024/25}
+
+\maketitle
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./pdf/Polimi_logo_coverpage.pdf}
+    \label{fig:Polimi_logo}
+\end{figure}
+
+\clearpage
+\tableofcontents
+\listoffigures
+% \listoftables
+% \lstlistoflistings
+% \printglossary[type=\acronymtype]
+
+\clearpage
+\input{src/01 - introduction.tex}
+\input{src/02 - grid_based_planning.tex}
+\input{src/03 - algorithm_testing.tex}
+\input{src/04 - conclusions.tex}
+
+% \vspace*{\fill}
+% \nocite{*}
+% \bibliographystyle{plain}
+% \bibliography{references.bib}
+
+\clearpage
+\appendix
+\section{MATLAB Graph implementation}
+\label{sec:graph_implementation}
+
+During the implementation of the Dijkstra and A* algorithms, a needs for a solid and efficient graph representation arose.
+In order to achieve this, a set of MATLAB classes was created to represent the graph, its nodes and its edges.
+
+In the following, the complete code used for this purpose is shown.
+One can refer back to the graph search algorithm implementation to understand how these classes are used.
+
+\lstinputlisting[
+    style=Matlab-editor,
+    caption={Graph class used to represent a weighted and directed/undirected graph.}
+]{files/Graph.m}
+
+\lstinputlisting[
+    style=Matlab-editor,
+    caption={Edge class used to represent a weighted and directed edge in the graph.}
+]{files/Edge.m}
+
+\lstinputlisting[
+    style=Matlab-editor,
+    caption={Node class used to represent a node in the graph.}
+]{files/Node.m}
+
+
+As a final note, a code profiler was used to test the performance of the graph implementation.
+The main bottleneck was found in the \texttt{getEdgeByConnection} method of the \texttt{Graph} class, as shown in Figure \ref{fig:graph_profiler}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{./img/code_profile.png}
+    \caption{Profiler output for the graph implementation.}
+    \label{fig:graph_profiler}
+\end{figure}
+
+The author of this report is aware that the graph implementation can be improved in terms of performance by using perhaps a caching mechanism or a more efficient data structure.
+However, this was not the main focus of the assignment and further investigation is left as future work.
+
+
+\end{document}
